@@ -1,0 +1,28 @@
+# LUNARIS / LUNAR-X backend — installable requirements
+# (mirrors the [project.dependencies] section of pyproject.toml)
+
+fastapi>=0.136
+uvicorn[standard]>=0.49
+pydantic>=2.12
+pydantic-settings>=2.7
+sqlalchemy>=2.0
+aiosqlite>=0.20
+asyncpg>=0.29
+python-multipart>=0.0.20
+python-dotenv>=1.0
+sse-starlette>=2.1
+httpx>=0.28
+numpy>=2.0
+scipy>=1.17
+opencv-contrib-python>=4.10
+scikit-image>=0.24
+pillow>=10.0
+torch>=2.0
+torchvision>=0.15
+kornia>=0.7
+pyyaml>=6.0
+matplotlib>=3.8
+psutil>=6.0
+
+# Optional (uncomment if you need GeoTIFF / rasterio-based tooling):
+# rasterio>=1.4

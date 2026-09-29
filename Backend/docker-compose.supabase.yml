@@ -1,0 +1,77 @@
+# ---------------------------------------------------------------------------
+# Local Supabase stack for LUNARIS — runs entirely in Docker, no cloud project
+# required. After the first `docker compose pull`, this works fully offline.
+#
+# What's included (deliberately minimal — the FastAPI backend only ever talks
+# to Postgres over asyncpg, it does not use Supabase Auth/REST/Storage):
+#   - db:     supabase/postgres  → the real Supabase Postgres build, port 54322
+#   - meta:   supabase/postgres-meta → lets Studio introspect the schema
+#   - studio: supabase/studio    → web dashboard to browse tables, port 54323
+#
+# Nothing about the FastAPI app, matching pipeline, or frontend changes.
+# The only thing that changes is DATABASE_URL in .env, which already existed
+# as a config value the app reads at startup.
+#
+# Usage:
+#   docker compose -f docker-compose.supabase.yml up -d      # start
+#   docker compose -f docker-compose.supabase.yml down       # stop (keeps data)
+#   docker compose -f docker-compose.supabase.yml down -v    # stop + wipe data
+#
+# Studio dashboard: http://localhost:54323
+# Postgres:          postgresql://postgres:postgres@localhost:54322/postgres
+# ---------------------------------------------------------------------------
+services:
+  db:
+    image: supabase/postgres:15.6.1.146
+    container_name: lunaris-supabase-db
+    restart: unless-stopped
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: /var/run/postgresql
+      JWT_SECRET: ${SUPABASE_JWT_SECRET:-e37c62908fb6434c7e88627d92149f870259a62d399e447f929f21619fdf9b22}
+    volumes:
+      - lunaris-supabase-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -h localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  meta:
+    image: supabase/postgres-meta:v0.84.2
+    container_name: lunaris-supabase-meta
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: postgres
+
+  studio:
+    image: supabase/studio:20241202-71e5240
+    container_name: lunaris-supabase-studio
+    restart: unless-stopped
+    ports:
+      - "54323:3000"
+    depends_on:
+      - meta
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: postgres
+      DEFAULT_ORGANIZATION_NAME: LUNARIS
+      DEFAULT_PROJECT_NAME: lunaris-local
+      SUPABASE_URL: http://localhost:54322
+      SUPABASE_PUBLIC_URL: http://localhost:54323
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzg5MTU0NjE2LCJleHAiOjIxMDQ1MTQ2MTZ9.J9CqHg2v8E_yCl9Pf_xkHp5gSyqDiLfDGQBs57iubMc}
+      SUPABASE_SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UiLCJpYXQiOjE3ODkxNTQ2MTYsImV4cCI6MjEwNDUxNDYxNn0.jKXD2ORW0G7iru8-H1JZAV-kXRvVww8ughG0fD9VYjk}
+
+volumes:
+  lunaris-supabase-db-data:
