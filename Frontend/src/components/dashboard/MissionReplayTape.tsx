@@ -52,7 +52,8 @@ export function MissionReplayTape() {
   React.useEffect(() => {
     const n = hydrateTape();
     if (n > 0) {
-      setRestored(n);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+        setRestored(n);
       toast({ title: "TAPE RESTORED", description: `${n} archived events reloaded — journal continuity intact.` });
     }
   }, []);

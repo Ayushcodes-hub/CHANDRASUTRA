@@ -23,26 +23,36 @@ export function StreamText({
   const doneRef = React.useRef(false);
 
   React.useEffect(() => {
+    // Intentional reset when the streamed text/configuration changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setN(0);
     doneRef.current = false;
+
     let i = 0;
     let timer: ReturnType<typeof setTimeout>;
+
     const start = setTimeout(() => {
       const step = () => {
         i += Math.random() < 0.22 ? 2 : 1;
+
         if (i >= text.length) {
           setN(text.length);
+
           if (!doneRef.current) {
             doneRef.current = true;
             onDone?.();
           }
+
           return;
         }
+
         setN(i);
         timer = setTimeout(step, speed + Math.random() * speed);
       };
+
       step();
     }, startDelay);
+
     return () => {
       clearTimeout(start);
       clearTimeout(timer);
@@ -50,6 +60,7 @@ export function StreamText({
   }, [text, speed, startDelay, onDone]);
 
   const done = n >= text.length;
+
   return (
     <span className={cn(!done && "caret", className)}>
       {text.slice(0, n)}
@@ -72,7 +83,11 @@ export function IntelFeed({
       {lines.map((l, i) => (
         <p key={i} className="text-[10.5px] leading-relaxed text-dim">
           <span className="text-gr mr-1.5 font-bold">&gt;</span>
-          <StreamText text={l} speed={speed} startDelay={400 + i * 1800} />
+          <StreamText
+            text={l}
+            speed={speed}
+            startDelay={400 + i * 1800}
+          />
         </p>
       ))}
     </div>

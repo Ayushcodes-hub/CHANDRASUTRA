@@ -45,7 +45,10 @@ export function AlertHistory() {
   /* rehydrate persisted anomalies once per session (localStorage journal) */
   React.useEffect(() => {
     const n = hydrateAlertLog();
-    if (n > 0) setRestored(n);
+    if (n > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRestored(n);
+    }
   }, []);
 
   /* A key toggles the triage drawer */
@@ -87,13 +90,11 @@ export function AlertHistory() {
           transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
           className="fixed bottom-[42px] right-2 top-[64px] z-[65] flex w-[300px] max-w-[calc(100vw-16px)] flex-col rounded-[3px] border border-line bg-[#0a0e14]/97 shadow-[0_8px_22px_-14px_rgba(0,0,0,0.9),0_0_50px_rgba(255,93,93,0.12)] backdrop-blur"
         >
-          {/* HUD corner brackets (hud-panel look without its position:relative override) */}
           <span aria-hidden="true" className="pointer-events-none absolute left-0 top-0 size-2.5 border-l-2 border-t-2 border-cy/50" />
           <span aria-hidden="true" className="pointer-events-none absolute right-0 top-0 size-2.5 border-r-2 border-t-2 border-cy/50" />
           <span aria-hidden="true" className="pointer-events-none absolute bottom-0 left-0 size-2.5 border-b-2 border-l-2 border-cy/50" />
           <span aria-hidden="true" className="pointer-events-none absolute bottom-0 right-0 size-2.5 border-b-2 border-r-2 border-cy/50" />
 
-          {/* header */}
           <header className="flex items-center justify-between gap-2 border-b border-line px-3 py-2.5">
             <div className="flex min-w-0 items-center gap-2">
               <BellRing className="size-[14px] shrink-0 text-rd" aria-hidden="true" />
@@ -127,7 +128,6 @@ export function AlertHistory() {
             </div>
           </header>
 
-          {/* severity tally */}
           <div className="grid grid-cols-3 gap-1.5 border-b border-line px-3 py-2">
             {SEV_ORDER.map((sev) => {
               const m = SEV_META[sev];
@@ -153,7 +153,6 @@ export function AlertHistory() {
             })}
           </div>
 
-          {/* restored banner */}
           {restored > 0 && (
             <div className="flex items-center justify-between gap-2 border-b border-line/70 bg-cy/5 px-3 py-1.5">
               <span className="flex items-center gap-1.5 text-[8px] uppercase tracking-[0.14em] text-cy">
@@ -174,7 +173,6 @@ export function AlertHistory() {
             </div>
           )}
 
-          {/* last critical banner */}
           {lastCritical && filter === "ALL" && (
             <div className="border-b border-line/60 bg-rd/5 px-3 py-1.5">
               <span className="text-[8px] uppercase tracking-[0.14em] text-rd/80">
@@ -183,7 +181,6 @@ export function AlertHistory() {
             </div>
           )}
 
-          {/* timeline */}
           <div className="min-h-0 flex-1 overflow-y-auto lm-no-scrollbar px-3 py-2">
             {shown.length === 0 ? (
               <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
@@ -195,7 +192,6 @@ export function AlertHistory() {
               </div>
             ) : (
               <ol className="relative space-y-2 pl-4" aria-label="Alert timeline">
-                {/* timeline rail */}
                 <span aria-hidden="true" className="absolute inset-y-1 left-[5px] w-px bg-gradient-to-b from-rd/50 via-am/30 to-cy/20" />
                 {shown
                   .slice()
@@ -204,7 +200,6 @@ export function AlertHistory() {
                     const m = SEV_META[a.sev];
                     return (
                       <li key={a.id} className="relative">
-                        {/* node */}
                         <span
                           aria-hidden="true"
                           className={cn(
@@ -230,7 +225,6 @@ export function AlertHistory() {
             )}
           </div>
 
-          {/* footer */}
           <footer className="flex items-center justify-between border-t border-line px-3 py-1.5">
             <span className="text-[8px] uppercase tracking-[0.16em] text-faint">OPS ANOMALY BUFFER · PERSISTED · 40 MAX</span>
             <span className="text-[8px] uppercase tracking-[0.16em] text-faint">

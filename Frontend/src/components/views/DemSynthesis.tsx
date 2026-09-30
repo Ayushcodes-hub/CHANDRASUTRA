@@ -458,8 +458,11 @@ export default function DemSynthesis() {
 
   /* keep WIREFRAME segment in two-way sync with the global store (F1 hotkey) */
   React.useEffect(() => {
+    // Intentional synchronization with the global wireframe/F1 state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMode((m) => (wireframe ? "wire" : m === "wire" ? "relief" : m));
   }, [wireframe]);
+
   const changeMode = React.useCallback(
     (m: ViewMode) => {
       setMode(m);
@@ -470,6 +473,7 @@ export default function DemSynthesis() {
 
   /* ── synthesis / export run ───────────────────────────────── */
   const running = exportPct !== null && exportPct < 100;
+
   React.useEffect(() => {
     if (!running) return;
     const iv = setInterval(() => {
@@ -480,15 +484,21 @@ export default function DemSynthesis() {
 
   React.useEffect(() => {
     if (exportPct === null || exportPct < 100 || exportDone) return;
+
+    // Intentional transition into the completed export state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setExportDone(true);
+
     toast({
       title: "DEM EXPORT COMPLETE",
       description: "shackleton_quad01_dem.tif · 32-BIT FLOAT · GEOGRID VERIFIED",
     });
+
     const t = setTimeout(() => {
       setExportPct(null);
       setExportDone(false);
     }, 2400);
+
     return () => clearTimeout(t);
   }, [exportPct, exportDone, toast]);
 
